@@ -90,7 +90,7 @@ def getTeam2kScores():
 		result[team['teamName']] = 0
 	for player in players.keys():
 		result[player.team] += player.rating
-    return json.dumps(result)
+	return json.dumps(result)
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=os.environ.get('PORT', '5000'))
