@@ -83,5 +83,14 @@ if time() - timeOfLastUpdate > REFRESH_RATE_SECONDS:
 def getPrediction(name):
     return json.dumps(players[kebabToSentence(name)])
 
+@app.route('/api/2k/total', methods=['GET'])
+def getTeam2kScores():
+	result = {}
+	for team in teams:
+		result[team['teamName']] = 0
+	for player in players.keys():
+		result[player.team] += player.rating
+    return json.dumps(result)
+
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=os.environ.get('PORT', '5000'))
