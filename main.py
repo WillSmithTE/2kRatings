@@ -4,7 +4,6 @@ import time
 import os
 import json
 import logging
-import pickle
 import glob
 from model.Data import Data
 from model.Team import Team
@@ -54,11 +53,6 @@ def getBasketBallReferenceAddress(playerName):
 	lastnameInitial = names[1][slice(1)]
 	return BASKETBALL_REFERENCE_ADDRESS + lastnameInitial + '/' + formattedName + '01.html&div=div_totals'
 
-def pickleDump(toDump):
-	pickleFile = open(str(newTime).split('.')[0] + '.pickle', 'wb')
-	pickle.dump(data, pickleFile)
-	pickleFile.close()
-
 def setPlayers():
 	lineupsResponses = {}
 	for team in teamsUtil:
@@ -84,8 +78,6 @@ def setPlayers():
 		)
 		data.teams[teamName].rating19_20 += (data.players[playerName].rating ** 8) * data.players[playerName].minutesPlayed
 	setTeamWins()
-
-	pickleDump(data)
 
 def get2020MinutesPlayedForCurrentTeam(playerName, response):
 	minutesIndex = response['resultSets'][0]['headers'].index('MIN')
@@ -115,16 +107,8 @@ def setTeamWins():
 
 app = Flask(__name__)
 CORS(app)
-savedPickleFileName = glob.glob('*.pickle')[0]
-timeOfLastUpdate = int(savedPickleFileName.split('.')[0])
 
-if time() - timeOfLastUpdate > REFRESH_RATE_SECONDS:
-	newTime = time()
-	setPlayers()
-	os.remove(savedPickleFileName)
-else:
-	with open(savedPickleFileName, 'rb') as file:
-		data = pickle.load(file)
+setPlayers()
 
 @app.route('/api/player/<name>', methods=['GET'])
 def getPrediction(name):
