@@ -25,8 +25,16 @@ NBA_STANDINGS_HEADERS = {
 	'x-nba-stats-origin': 'stats',
 	'referer': 'https://stats.nba.com/standings/'
 }
-
+def getLineupsAddress(team):
+	return ('https://stats.nba.com/stats/leaguedashlineups?Conference=&DateFrom=&DateTo=&Division=&GameID=&GameSegment=&GroupQuantity=5&LastNGames=0&LeagueID=00&Location=&MeasureType=Advanced&Month=0&OpponentTeamID=0&Outcome=&PORound=0&PaceAdjust=N&PerMode=PerGame&Period=0&PlusMinus=N&Rank=N&Season=2019-20&SeasonSegment=&SeasonType=Regular+Season&ShotClockRange=&TeamID='
+		+ str(team.id) + '&VsConference=&VsDivision=')
+LINEUPS_HEADERS = {
+	'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36',
+	'x-nba-stats-origin': 'stats',
+	'Referer': 'https://stats.nba.com/lineups/advanced/?Season=2019-20&SeasonType=Regular%20Season&TeamID=1610612750'
+}
 data = Data()
+newTime = 0
 
 def kebabToSentence(kebabCaseName):
 	return ' '.join(kebabCaseName.split('-'))
@@ -47,14 +55,15 @@ def getBasketBallReferenceAddress(playerName):
 	return BASKETBALL_REFERENCE_ADDRESS + lastnameInitial + '/' + formattedName + '01.html&div=div_totals'
 
 def pickleDump(toDump):
-	pickleFile = open(str(time()).split('.')[0] + '.pickle', 'wb')
+	pickleFile = open(str(newTime).split('.')[0] + '.pickle', 'wb')
 	pickle.dump(data, pickleFile)
 	pickleFile.close()
 
 def setPlayers():
+	lineupsResponses = {}
 	for team in teamsUtil:
 		teamName = team.fullName
-		data.teams[teamName] = Team()
+		data.teams[teamName] = Team(team.id)
 		teamUrl = getTeamUrl(teamName)
 		response = requests.get(teamUrl)
 		soup = BeautifulSoup(response.text, 'html.parser')
@@ -65,26 +74,30 @@ def setPlayers():
 		for i in range(len(playerNamesForTeam)):
 			rating = scores[i]
 			data.players[playerNamesForTeam[i]] = Player(teamName, rating)
-			data.teams[teamName].rating += rating
-	
+			data.teams[teamName].totalRating += (rating ** 8)
+		lineupsResponses[teamName] = requests.get(getLineupsAddress(team), headers=LINEUPS_HEADERS).json()
 	for playerName in data.players.keys():
-		data.players[playerName].minutesPlayed = get2020MinutesPlayedForCurrentTeam(playerName)
+		teamName = data.players[playerName].teamName
+		data.players[playerName].minutesPlayed = get2020MinutesPlayedForCurrentTeam(
+			playerName,
+			lineupsResponses[teamName]
+		)
+		data.teams[teamName].rating19_20 += (data.players[playerName].rating ** 8) * data.players[playerName].minutesPlayed
 	setTeamWins()
 
 	pickleDump(data)
 
-def get2020MinutesPlayedForCurrentTeam(playerName):
-	response = requests.get(getBasketBallReferenceAddress(playerName))
-	soup = BeautifulSoup(response.text, 'html.parser')
-	totals = soup.find_all(id='totals.2020')
-	try:
-		yearRow = totals[len(totals) - 1]
-		statTags = yearRow.find_all('td')
-		minutesPlayed = int(list(filter(lambda tag: tag['data-stat']=='mp',statTags))[0].contents[0])
-		return minutesPlayed
-	except:
-		logging.error('failed to get 2019-2020 minutes for ' + playerName)
-		return 0
+def get2020MinutesPlayedForCurrentTeam(playerName, response):
+	minutesIndex = response['resultSets'][0]['headers'].index('MIN')
+	groupNameIndex = response['resultSets'][0]['headers'].index('GROUP_NAME')
+	minutes = 0
+	dataRows = response['resultSets'][0]['rowSet']
+	for row in dataRows:
+		splitName = playerName.split(' ')
+		lastName = splitName[len(splitName) - 1]
+		if lastName in row[groupNameIndex].lower():
+			minutes += row[minutesIndex]
+	return minutes
 
 def setTeamWins():
 	response = requests.get(NBA_STANDINGS_ADDRESS, headers=NBA_STANDINGS_HEADERS).json()
@@ -95,6 +108,8 @@ def setTeamWins():
 	dataRows = response['resultSets'][0]['rowSet']
 	for row in dataRows:
 		teamname = row[teamcityIndex] + ' ' + row[teamnameIndex]
+		if teamname == 'LA Clippers':
+			teamname = 'Los Angeles Clippers'
 		wins = row[winsIndex]
 		data.teams[teamname].wins = wins
 
@@ -104,16 +119,24 @@ savedPickleFileName = glob.glob('*.pickle')[0]
 timeOfLastUpdate = int(savedPickleFileName.split('.')[0])
 
 if time() - timeOfLastUpdate > REFRESH_RATE_SECONDS:
+	newTime = time()
 	setPlayers()
 	os.remove(savedPickleFileName)
+else:
+	with open(savedPickleFileName, 'rb') as file:
+		data = pickle.load(file)
 
 @app.route('/api/player/<name>', methods=['GET'])
 def getPrediction(name):
     return json.dumps(data.players[kebabToSentence(name)])
 
 @app.route('/api/team', methods=['GET'])
-def getTeam2kScores():
-	return json.dumps(data.teams)
+def getTeams():
+	return json.dumps(data.teams, default=lambda x: x.__dict__)
+
+@app.route('/api/player', methods=['GET'])
+def getPlayers():
+	return json.dumps(data.players, default=lambda x: x.__dict__)
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=os.environ.get('PORT', '5000'))
