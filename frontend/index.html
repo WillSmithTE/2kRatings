@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="main.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+    <h1>NBA 2K20 Team Ratings</h1>
+    <div id="loading"><h1>Loading...</h1></div>
+    <table id="teamTable">
+        <thead>
+            <tr>
+                <th>Team</th>
+                <th>Win Efficiency</th>
+                <th>2019-20 Value</th>
+                <th>Wins</th>
+                <th>Current Rating</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <ul>
+        <li>
+            Win Efficiency is the ratio of wins in the 2019-20 season to the expected output as per NBA 2K; e.g. the Raptors have a great win efficiency because a lot of their minutes have been played by guys with low 2K ratings and yet they have a lot of wins.<br />
+         = wins / SUM_ALL_PLAYERS(2019_20_minutes x scaled_2k_rating)
+        </li>
+        <li>
+            To determine a player's value their rating isn't just added. Every player's value is raised to the power of 8 so that 2 players of ratings 75 and 100 create the same amount of value when player of 75 plays 10x the minutes of the player of 100. Yeah it's not perfect...
+        </li>
+    </ul>
+     <h1>Player Ratings</h1>
+     <table id="playerTable">
+         <thead>
+             <tr>
+                 <th>Name</th>
+                 <th>Rating</th>
+                 <th>Team</th>
+                 <th>2019-20 Value For Team</th>
+                 <th>Minutes for team</th>
+             </tr>
+         </thead>
+         <tbody></tbody>
+     </table>
+ </body>
+
+</html>

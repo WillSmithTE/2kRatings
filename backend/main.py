@@ -108,11 +108,12 @@ def setTeamWins():
 app = Flask(__name__)
 CORS(app)
 
-setPlayers()
+# setPlayers()
 
 @app.route('/api/player/<name>', methods=['GET'])
 def getPrediction(name):
-    return json.dumps(data.players[kebabToSentence(name)])
+	return 'you searched for ' + name
+    # return json.dumps(data.players[kebabToSentence(name)])
 
 @app.route('/api/team', methods=['GET'])
 def getTeams():
