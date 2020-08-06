@@ -1,6 +1,6 @@
 class Player:
-    def __init__(self, id, name, teamName, rating):
-        self.id = id
+    def __init__(self, name, teamName, rating):
+        self.id = 'dummyid'
         self.name = name
         self.teamName = teamName
         self.rating = rating
