@@ -16,7 +16,6 @@ NBA_STANDINGS_HEADERS = {
 BASE_RATINGS_ADDRESS = 'https://www.2kratings.com/nba2k20-team/'
 
 class TeamService:
-    @staticmethod
     def getTeams():
         teams = {}
         for team in teamsUtil:
@@ -24,7 +23,6 @@ class TeamService:
             teams[teamName] = Team(team.id)
         return teams
 
-    @staticmethod
     def addWinsToTeams(teams):
         response = requests.get(NBA_STANDINGS_ADDRESS, headers=NBA_STANDINGS_HEADERS).json()
         headers = response['resultSets'][0]['headers']
@@ -42,7 +40,6 @@ class TeamService:
             else:
                 logging.error('Found "wins" for a team not in the db: ' + teamname)
 
-    @staticmethod
     def getPlayers(teamName):
         teamUrl = getTeamUrl(teamName)
         response = requests.get(teamUrl)
