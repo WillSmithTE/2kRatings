@@ -16,14 +16,14 @@ NBA_STANDINGS_HEADERS = {
 BASE_RATINGS_ADDRESS = 'https://www.2kratings.com/nba2k20-team/'
 
 class TeamService:
-    def getTeams():
+    def getTeams(_):
         teams = {}
         for team in teamsUtil:
             teamName = team.fullName
             teams[teamName] = Team(team.id)
         return teams
 
-    def addWinsToTeams(teams):
+    def addWinsToTeams(_, teams):
         response = requests.get(NBA_STANDINGS_ADDRESS, headers=NBA_STANDINGS_HEADERS).json()
         headers = response['resultSets'][0]['headers']
         teamcityIndex = headers.index('TeamCity')
@@ -40,7 +40,7 @@ class TeamService:
             else:
                 logging.error('Found "wins" for a team not in the db: ' + teamname)
 
-    def getPlayers(teamName):
+    def getPlayers(_, teamName):
         teamUrl = getTeamUrl(teamName)
         response = requests.get(teamUrl)
         soup = BeautifulSoup(response.text, 'html.parser')

@@ -13,3 +13,6 @@ class TeamMinutes:
 
     def __eq__(self, other):
         return self.teamName == other.teamName and self.minutes == other.minutes
+
+    def __hash__(self):
+        return hash((self.teamName, self.minutes))

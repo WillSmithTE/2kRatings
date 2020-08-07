@@ -21,6 +21,7 @@ app = Flask(__name__)
 CORS(app)
 teamService = TeamService()
 playerService = PlayerService()
+data = Data()
 
 @app.route('/api/player/<name>', methods=['GET'])
 def getPrediction(name):
@@ -65,7 +66,7 @@ def setPlayers2kRatings():
 
 def setTeam2kRatings():
 	for player in data.players.values():
-		data.teams[player.teamName].2kRating += player.rating
+		data.teams[player.teamName].rating2k += player.rating
 	logging.info('Teams 2k ratings added')
 
 def setPlayersMinutesPlayedAndTeamsExpectedQuality():
@@ -73,12 +74,11 @@ def setPlayersMinutesPlayedAndTeamsExpectedQuality():
 		player.teamsMinutes = playerService.get2020Minutes(player.id)
 		for teamMinutes in player.teamsMinutes:
 			valueAdded = (player.rating ** 8) * teamMinutes.minutes
-			data.teams[teamMinutes.teamName].2019_20ExpectedQuality += valueAdded
+			data.teams[teamMinutes.teamName].expectedQuality19_20 += valueAdded
 	logging.info('Players minutes and teams expected quality set')
 
 def kebabToSentence(kebabCaseName):
 	return ' '.join(kebabCaseName.split('-'))
 
-data = Data()
 threading.Thread(target=startAPI).start()
 threading.Thread(target=main).start()

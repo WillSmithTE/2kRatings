@@ -1,7 +1,7 @@
 from util.util import *
 from model.Player import Player
 from model.Player import TeamMinutes
-from util.teams import teams
+from util.teams import teams, getTeamFromAbbreviation
 from model.NbaStats import NbaStats
 import requests
 from bs4 import BeautifulSoup
@@ -22,7 +22,7 @@ NBA_STATS_HEADERS = {
 }
 
 def getPlayerStatsAddress(playerId):
-    return 'https://stats.nba.com/stats/playerdashboardbyyearoveryear?DateFrom=&DateTo=&GameSegment=&LastNGames=0&LeagueID=00&Location=&MeasureType=Base&Month=0&OpponentTeamID=0&Outcome=&PORound=0&PaceAdjust=N&PerMode=PerGame&Period=0&PlayerID=' + playerId + '&PlusMinus=N&Rank=N&Season=2019-20&SeasonSegment=&SeasonType=Regular+Season&ShotClockRange=&Split=yoy&VsConference=&VsDivision='
+    return 'https://stats.nba.com/stats/playerdashboardbyyearoveryear?DateFrom=&DateTo=&GameSegment=&LastNGames=0&LeagueID=00&Location=&MeasureType=Base&Month=0&OpponentTeamID=0&Outcome=&PORound=0&PaceAdjust=N&PerMode=PerGame&Period=0&PlayerID=' + str(playerId) + '&PlusMinus=N&Rank=N&Season=2019-20&SeasonSegment=&SeasonType=Regular+Season&ShotClockRange=&Split=yoy&VsConference=&VsDivision='
 
 class PlayerService:
 
@@ -61,7 +61,7 @@ class PlayerService:
                 logging.error('Failed to extract a 2k rating')
 
     def get2020Minutes(self, playerId):
-        minutesList = []
+        minutesList = set()
 
         stats = NbaStats(requests.get(getPlayerStatsAddress(playerId), headers=NBA_STATS_HEADERS).json())
         minutesColumnIndex = stats.getColumnIndex('MIN')
@@ -72,9 +72,10 @@ class PlayerService:
             if row[teamIndex] != TOTAL_ROW:
                 minutesPerGame = row[minutesColumnIndex]
                 gamesPlayed = row[gamesPlayedColumnIndex]
-                team = row[teamIndex]
+                teamAbbreviation = row[teamIndex]
+                teamName = getTeamFromAbbreviation(teamAbbreviation).fullName
                 minutes = round(minutesPerGame * gamesPlayed)
-                minutesList.append(TeamMinutes(team, minutes))
+                minutesList.add(TeamMinutes(teamName, minutes))
         return minutesList
 
     def playerSoupToPlayer(self, soupPlayer, teamName):

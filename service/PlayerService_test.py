@@ -7,15 +7,16 @@ playerService = PlayerService()
 def testGetMinutesTraeYoung():
    player = Player("1629027", "Trae Young", "Atlanta Hawks")
    teamsMinutes = playerService.get2020Minutes(player.id)
-   assert teamsMinutes == [TeamMinutes('ATL', 2118)]
+   assert teamsMinutes == {TeamMinutes('Atlanta Hawks', 2118)}
 
 def testGetMinutesMalikBeasley():
    player = Player("1627736", "Malik Beasley", "Minnesota Timberwolves")
-   teamsMinutes = playerService.get2020Minutes(player.id)
-   assert teamsMinutes == [
-      TeamMinutes('MIN', 463),
-      TeamMinutes('DEN', 746)
-   ]
+   actual = playerService.get2020Minutes(player.id)
+   
+   assert actual == {
+      TeamMinutes('Minnesota Timberwolves', 463),
+      TeamMinutes('Denver Nuggets', 746)
+   } 
 
 def testGetAllPlayers():
    assert len(playerService.getAllPlayers().values()) > 100

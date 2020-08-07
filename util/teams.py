@@ -40,3 +40,6 @@ teams = [
   TeamInfo(1610612762, "UTA", "Utah Jazz", "Jazz", "Utah"),
   TeamInfo(1610612764, "WAS", "Washington Wizards", "Wizards", "Washington")
 ]
+
+def getTeamFromAbbreviation(abbreviation):
+  return next(team for team in teams if team.abbreviation == abbreviation)
