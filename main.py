@@ -45,32 +45,39 @@ def startAPI():
 
 def main():
 	initialiseTeams()
-	setPlayersAndTeamTotalRatings()
-	setPlayersMinutesPlayedAndTeamsSeasonRatings()
+	setPlayers()
+	setPlayers2kRatings()
+	setTeam2kRatings
+	setPlayersMinutesPlayedAndTeamsExpectedQuality()
 
 def initialiseTeams():
 	data.teams = teamService.getTeams()
 	teamService.addWinsToTeams(data.teams)
 	logging.info('Teams created')
 
-def setPlayersAndTeamTotalRatings():
-	for teamName in data.teams.keys():
-		teamPlayers = teamService.getPlayers(teamName)
-		for player in teamPlayers:
-			data.players[player.name] = player
-			data.teams[teamName].totalRating += (player.rating ** 8)
-	logging.info('Players set')
+def setPlayers():
+	data.players = playerService.getAllPlayers()
+	logging.info('Players created')
 
-def setPlayersMinutesPlayedAndTeamsSeasonRatings():
+def setPlayers2kRatings():
+	playerService.put2kRatingsOnPlayers(data.players)
+	logging.info('Player 2k ratings added')
+
+def setTeam2kRatings():
 	for player in data.players.values():
-		player.minutesPlayed = playerService.get2020MinutesPlayedForCurrentTeam(player)
-		data.teams[player.teamName].rating19_20 += (player.rating ** 8) * player.minutesPlayed
-	logging.info('Players minutes set')
+		data.teams[player.teamName].2kRating += player.rating
+	logging.info('Teams 2k ratings added')
+
+def setPlayersMinutesPlayedAndTeamsExpectedQuality():
+	for player in data.players.values():
+		player.teamsMinutes = playerService.get2020Minutes(player.id)
+		for teamMinutes in player.teamsMinutes:
+			valueAdded = (player.rating ** 8) * teamMinutes.minutes
+			data.teams[teamMinutes.teamName].2019_20ExpectedQuality += valueAdded
+	logging.info('Players minutes and teams expected quality set')
 
 def kebabToSentence(kebabCaseName):
 	return ' '.join(kebabCaseName.split('-'))
-
-BASKETBALL_REFERENCE_ADDRESS = 'https://widgets.sports-reference.com/wg.fcgi?css=1&site=bbr&url=/players/'
 
 data = Data()
 threading.Thread(target=startAPI).start()
