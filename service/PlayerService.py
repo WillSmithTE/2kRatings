@@ -61,7 +61,7 @@ class PlayerService:
                 logging.error('Failed to extract a 2k rating')
 
     def get2020Minutes(self, playerId):
-        minutesList = set()
+        minutesList = []
 
         stats = NbaStats(requests.get(getPlayerStatsAddress(playerId), headers=NBA_STATS_HEADERS).json())
         minutesColumnIndex = stats.getColumnIndex('MIN')
@@ -75,7 +75,7 @@ class PlayerService:
                 teamAbbreviation = row[teamIndex]
                 teamName = getTeamFromAbbreviation(teamAbbreviation).fullName
                 minutes = round(minutesPerGame * gamesPlayed)
-                minutesList.add(TeamMinutes(teamName, minutes))
+                minutesList.append(TeamMinutes(teamName, minutes))
         return minutesList
 
     def playerSoupToPlayer(self, soupPlayer, teamName):

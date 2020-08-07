@@ -12,10 +12,8 @@ from flask_cors import CORS
 from time import time
 import threading
 
+logging.basicConfig()
 logging.root.setLevel(logging.INFO)
-
-import sys
-sys.setrecursionlimit(100000)
 
 app = Flask(__name__)
 CORS(app)
@@ -42,14 +40,22 @@ def hi():
 
 def startAPI():
 	if __name__ == '__main__':
-		app.run(host='0.0.0.0', port=os.environ.get('5000'))
+		app.run(host='0.0.0.0', port=os.environ.get('5000'), debug=False)
 
 def main():
 	initialiseTeams()
+	print(1)
 	setPlayers()
+	print(2)
+
 	setPlayers2kRatings()
+	print(3)
+
 	setTeam2kRatings
+	print(4)
+
 	setPlayersMinutesPlayedAndTeamsExpectedQuality()
+	print(5)
 
 def initialiseTeams():
 	data.teams = teamService.getTeams()
@@ -65,7 +71,9 @@ def setPlayers2kRatings():
 	logging.info('Player 2k ratings added')
 
 def setTeam2kRatings():
+	print('startTeam2kratings')
 	for player in data.players.values():
+		print()
 		data.teams[player.teamName].rating2k += player.rating
 	logging.info('Teams 2k ratings added')
 
@@ -80,5 +88,5 @@ def setPlayersMinutesPlayedAndTeamsExpectedQuality():
 def kebabToSentence(kebabCaseName):
 	return ' '.join(kebabCaseName.split('-'))
 
-threading.Thread(target=startAPI).start()
 threading.Thread(target=main).start()
+threading.Thread(target=startAPI).start()
