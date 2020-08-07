@@ -40,7 +40,7 @@ def hi():
 
 def startAPI():
 	if __name__ == '__main__':
-		app.run(host='0.0.0.0', port=os.environ.get('5000'), debug=False)
+		app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=False)
 
 def main():
 	initialiseTeams()
