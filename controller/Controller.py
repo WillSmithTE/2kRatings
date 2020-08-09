@@ -1,6 +1,7 @@
 import os
 import json
 from util.util import kebabToSentence
+from flask import request
 
 
 def Controller(app, data):
@@ -19,6 +20,11 @@ def Controller(app, data):
     @app.route('/api/feedback', methods=['GET'])
     def getFeedback():
         return json.dumps(data.feedback, default=lambda x: x.__dict__)
+
+    @app.route('/api/feedback', methods=['POST'])
+    def addFeedback():
+        data.feedback.append(request.json['feedback'])
+        return 'feedback received, thanks mate'
 
     @app.route('/hi', methods=['GET'])
     def hi(_):
