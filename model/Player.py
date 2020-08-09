@@ -6,6 +6,7 @@ class Player:
         self.rating = 0
         self.teamsMinutes = []
 
+
 class TeamMinutes:
     def __init__(self, teamName, minutes):
         self.teamName = teamName
