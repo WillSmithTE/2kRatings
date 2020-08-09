@@ -6,3 +6,4 @@ class Data:
     def __init__(self):
         self.teams: Dict[str, Team] = {}
         self.players: Dict[str, Player] = {}
+        self.feedback = []

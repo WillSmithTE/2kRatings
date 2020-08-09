@@ -5,7 +5,7 @@ from util.util import kebabToSentence
 
 def Controller(app, data):
     @app.route('/api/player/<name>', methods=['GET'])
-    def getPrediction(name):
+    def getPlayer(name):
         return json.dumps(data.players[kebabToSentence(name)])
 
     @app.route('/api/team', methods=['GET'])
@@ -15,6 +15,10 @@ def Controller(app, data):
     @app.route('/api/player', methods=['GET'])
     def getPlayers():
         return json.dumps(data.players, default=lambda x: x.__dict__)
+
+    @app.route('/api/feedback', methods=['GET'])
+    def getFeedback():
+        return json.dumps(data.feedback, default=lambda x: x.__dict__)
 
     @app.route('/hi', methods=['GET'])
     def hi(_):
