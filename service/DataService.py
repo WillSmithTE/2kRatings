@@ -27,7 +27,7 @@ class DataService:
 
         if cache:
             save(self.data, 'data.pickle')
-  
+
     def getAndCacheAllData(self):
         self.getAllData(True)
 
@@ -48,7 +48,7 @@ class DataService:
         print('startTeam2kratings')
         for player in self.data.players.values():
             if player.teamName in self.data.teams:
-                self.data.teams[player.teamName].rating2k += player.rating
+                self.data.teams[player.teamName].rating2k += player.rating ** 8
             else:
                 logging.error('Unable to find team "' + player.teamName + '" of ' + player.name + ' in db')
         logging.info('Teams 2k ratings added')
