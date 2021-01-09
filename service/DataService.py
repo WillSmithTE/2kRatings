@@ -2,7 +2,7 @@ import logging
 from service.TeamService import TeamService
 from service.PlayerService import PlayerService
 from util.util import save
-
+import time
 
 class DataService:
     def __init__(self, data):
@@ -12,18 +12,10 @@ class DataService:
 
     def getAllData(self, cache=False):
         self.initialiseTeams()
-        print(1)
         self.setPlayers()
-        print(2)
-
         self.setPlayers2kRatings()
-        print(3)
-
         self.setTeam2kRatings()
-        print(4)
-
         self.setPlayersMinutesPlayedAndTeamsExpectedQuality()
-        print(5)
 
         if cache:
             save(self.data, 'data.pickle')
@@ -32,8 +24,13 @@ class DataService:
         self.getAllData(True)
 
     def initialiseTeams(self):
+        print('before teamService getTeams')
         self.data.teams = self.teamService.getTeams()
+        print('after teamService getTeams')
         self.teamService.addWinsToTeams(self.data.teams)
+        print(1)
+        self.teamService.add20_21WinsLossesToTeams(self.data.teams)
+        print(2)
         logging.info('Teams created')
 
     def setPlayers(self):
@@ -55,9 +52,9 @@ class DataService:
 
     def setPlayersMinutesPlayedAndTeamsExpectedQuality(self):
         for index, player in enumerate(self.data.players.values()):
-            if index % 50 == 0:
-                print(index, 'players minutes set')
+            print(index, 'players minutes set')
             player.teamsMinutes = self.playerService.get2020Minutes(player.id)
+            time.sleep()
             for teamMinutes in player.teamsMinutes:
                 valueAdded = (player.rating ** 8) * teamMinutes.minutes
                 self.data.teams[teamMinutes.teamName].expectedQuality19_20 += valueAdded
